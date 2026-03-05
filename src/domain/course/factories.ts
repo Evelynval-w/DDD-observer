@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid"
 import { CourseId, CourseTitle } from "./types"
 import { Course } from "./course"
 import { Module } from "../module/module"
+import { DomainEvent } from "../events/events"
 
 // ─── Smart Constructors ───────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ export function createCourse(
 
 export function evaluateCourseCompletion(
   course: Course,
-  notify: (event: any) => void
+  notify: (event: DomainEvent) => void
 ): Course {
   const allPassed = course.modules.every((m) => m.status === "Passed")
 

@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid"
 import { ModuleId, ModuleTitle, QuizScore, AttemptCount } from "./types"
 import { Module } from "./module"
+import { DomainEvent } from "../events/events"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -54,7 +55,7 @@ export function createModule(title: ModuleTitle): Module {
 export function submitQuiz(
   module: Module,
   rawScore: number,
-  notify: (event: any) => void
+  notify: (event: DomainEvent) => void
 ): Module {
   // Business Rule: cannot attempt a locked module
   if (module.status === "Locked") {
