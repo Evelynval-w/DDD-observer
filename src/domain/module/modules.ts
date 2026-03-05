@@ -1,4 +1,4 @@
-import { ModuleId, ModuleTitle, QuizScore, AttemptCount, ModuleStatus } from "./types"
+import { ModuleId, ModuleTitle, QuizScore, AttemptCount, ModuleStatus } from "./types.js"
 
 // ─── Entity Definition ────────────────────────────────────────────────────────
 // All fields are readonly.
