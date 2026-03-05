@@ -120,3 +120,37 @@ try {
 } catch (e) {
   if (e instanceof Error) console.error("[ERROR CAUGHT]", e.message)
 }
+
+// ─── Extra Tests: Covering remaining business rules ───────────────────────────
+
+console.log("\n── Extra Test 1: Module passing on first attempt ──")
+let moduleFirstTry = createModule(createModuleTitle("TypeScript Basics"))
+moduleFirstTry = submitQuiz(moduleFirstTry, 80, notifyObservers)
+console.log(`Module status (should be Passed): ${moduleFirstTry.status}`)
+console.log(`Attempts used (should be 1): ${moduleFirstTry.attempts}`)
+
+console.log("\n── Extra Test 2: Module failing once then passing on retry ──")
+let moduleRetry = createModule(createModuleTitle("Advanced Generics"))
+moduleRetry = submitQuiz(moduleRetry, 50, notifyObservers) // fail
+console.log(`After fail — status (should be Failed): ${moduleRetry.status}`)
+console.log(`Attempts used (should be 1): ${moduleRetry.attempts}`)
+moduleRetry = submitQuiz(moduleRetry, 75, notifyObservers) // pass on retry
+console.log(`After retry — status (should be Passed): ${moduleRetry.status}`)
+console.log(`Attempts used (should be 2): ${moduleRetry.attempts}`)
+
+console.log("\n── Extra Test 3: Two courses are independent entities ──")
+let moduleX = createModule(createModuleTitle("Module X"))
+let moduleY = createModule(createModuleTitle("Module Y"))
+moduleX = submitQuiz(moduleX, 90, notifyObservers)
+moduleY = submitQuiz(moduleY, 88, notifyObservers)
+
+const courseOne = createCourse(createCourseTitle("Course One"), [moduleX])
+const courseTwo = createCourse(createCourseTitle("Course Two"), [moduleY])
+
+console.log(`courseOne id === courseTwo id (should be false): ${courseOne.id === courseTwo.id}`)
+
+const completedCourseOne = evaluateCourseCompletion(courseOne, notifyObservers)
+const completedCourseTwo = evaluateCourseCompletion(courseTwo, notifyObservers)
+
+console.log(`courseOne status (should be Completed): ${completedCourseOne.status}`)
+console.log(`courseTwo status (should be Completed): ${completedCourseTwo.status}`)
