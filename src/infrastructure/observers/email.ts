@@ -1,4 +1,4 @@
-import { DomainEvent } from "../domain/events/events"
+import { DomainEvent } from "../../domain/events/events"
 
 // ─── Email Mock Observer ──────────────────────────────────────────────────────
 // Simulates sending emails in reaction to domain events.
