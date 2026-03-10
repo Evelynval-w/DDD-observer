@@ -1,4 +1,4 @@
-import { DomainEvent } from "../../src/domain/events/events"
+import { DomainEvent } from "../../domain/events/events"
 
 // ─── Observer Type ────────────────────────────────────────────────────────────
 // An observer is any function that receives a DomainEvent and returns nothing.

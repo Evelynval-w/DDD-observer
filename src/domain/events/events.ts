@@ -1,10 +1,8 @@
 import { ModuleId, QuizScore, AttemptCount } from "../module/types"
 import { CourseId, CourseTitle } from "../course/types"
+import { StudentId, StreakCount, XPPoints } from "../student/types"
 
-// ─── Individual Event Types ───────────────────────────────────────────────────
-// Every field is readonly — observers cannot accidentally mutate event data.
-// Every event has a unique "type" string — this is the emitter name the
-// observer checks to decide what action to take.
+// ─── Module Events ────────────────────────────────────────────────────────────
 
 export type ModulePassedEvent = {
   readonly type: "ModulePassed"
@@ -25,19 +23,43 @@ export type ModuleLockedEvent = {
   readonly attempts: AttemptCount
 }
 
+// ─── Course Events ────────────────────────────────────────────────────────────
+
 export type CourseCompletedEvent = {
   readonly type: "CourseCompleted"
   readonly courseId: CourseId
   readonly courseTitle: CourseTitle
 }
 
+// ─── Student Events ───────────────────────────────────────────────────────────
+
+export type StreakIncrementedEvent = {
+  readonly type: "StreakIncremented"
+  readonly studentId: StudentId
+  readonly newStreak: StreakCount
+}
+
+export type StreakBrokenEvent = {
+  readonly type: "StreakBroken"
+  readonly studentId: StudentId
+  readonly lostStreak: StreakCount
+}
+
+export type XPAwardedEvent = {
+  readonly type: "XPAwarded"
+  readonly studentId: StudentId
+  readonly points: XPPoints
+}
+
 // ─── Discriminated Union ──────────────────────────────────────────────────────
 // DomainEvent is the single contract shared by ALL observers.
 // The observer uses event.type to decide what to do.
-// TypeScript will warn you if you forget to handle a case.
 
 export type DomainEvent =
   | ModulePassedEvent
   | ModuleFailedEvent
   | ModuleLockedEvent
   | CourseCompletedEvent
+  | StreakIncrementedEvent
+  | StreakBrokenEvent
+  | XPAwardedEvent

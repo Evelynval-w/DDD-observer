@@ -1,8 +1,9 @@
-import { notifyObservers, observers } from "./infrastructure/observers/observer"
-import { sendEmailMock } from "./infrastructure/observers/email"
-import { saveToDatabaseMock } from "./infrastructure/observers/database"
+import { notifyObservers, observers } from "./src/infrastructure/observers/observer"
+import { sendEmailMock } from "./src/infrastructure/observers/email"
+import { saveToDatabaseMock } from "./src/infrastructure/observers/database"
 import { createModuleTitle, createModule, submitQuiz } from "./src/domain/module/factories"
 import { createCourseTitle, createCourse, evaluateCourseCompletion } from "./src/domain/course/factories"
+import { createStudentName, createStudent, incrementStreak, breakStreak, awardXP } from "./src/domain/student/factories"
 
 // ─── Wire Up Observers ────────────────────────────────────────────────────────
 // This is the only place observers are plugged in.
@@ -120,3 +121,92 @@ try {
 } catch (e) {
   if (e instanceof Error) console.error("[ERROR CAUGHT]", e.message)
 }
+
+// ─── Extra Tests: Covering remaining business rules ───────────────────────────
+
+console.log("\n── Extra Test 1: Module passing on first attempt ──")
+let moduleFirstTry = createModule(createModuleTitle("TypeScript Basics"))
+moduleFirstTry = submitQuiz(moduleFirstTry, 80, notifyObservers)
+console.log(`Module status (should be Passed): ${moduleFirstTry.status}`)
+console.log(`Attempts used (should be 1): ${moduleFirstTry.attempts}`)
+
+console.log("\n── Extra Test 2: Module failing once then passing on retry ──")
+let moduleRetry = createModule(createModuleTitle("Advanced Generics"))
+moduleRetry = submitQuiz(moduleRetry, 50, notifyObservers) // fail
+console.log(`After fail — status (should be Failed): ${moduleRetry.status}`)
+console.log(`Attempts used (should be 1): ${moduleRetry.attempts}`)
+moduleRetry = submitQuiz(moduleRetry, 75, notifyObservers) // pass on retry
+console.log(`After retry — status (should be Passed): ${moduleRetry.status}`)
+console.log(`Attempts used (should be 2): ${moduleRetry.attempts}`)
+
+console.log("\n── Extra Test 3: Two courses are independent entities ──")
+let moduleX = createModule(createModuleTitle("Module X"))
+let moduleY = createModule(createModuleTitle("Module Y"))
+moduleX = submitQuiz(moduleX, 90, notifyObservers)
+moduleY = submitQuiz(moduleY, 88, notifyObservers)
+
+const courseOne = createCourse(createCourseTitle("Course One"), [moduleX])
+const courseTwo = createCourse(createCourseTitle("Course Two"), [moduleY])
+
+console.log(`courseOne id === courseTwo id (should be false): ${courseOne.id === courseTwo.id}`)
+
+const completedCourseOne = evaluateCourseCompletion(courseOne, notifyObservers)
+const completedCourseTwo = evaluateCourseCompletion(courseTwo, notifyObservers)
+
+console.log(`courseOne status (should be Completed): ${completedCourseOne.status}`)
+console.log(`courseTwo status (should be Completed): ${completedCourseTwo.status}`)
+
+
+// ─── Student Tests ────────────────────────────────────────────────────────────
+
+console.log("\n── Student Tests: Streak and XP ──")
+
+// Create a student
+let student = createStudent(createStudentName("Makuo"))
+console.log(`Student created: ${student.name}, streak: ${student.streak}, xp: ${student.xp}`)
+
+// Increment streak 3 times
+student = incrementStreak(student, notifyObservers)
+student = incrementStreak(student, notifyObservers)
+student = incrementStreak(student, notifyObservers)
+console.log(`After 3 days — streak (should be 3): ${student.streak}`)
+
+// Award XP
+student = awardXP(student, 100, notifyObservers)
+student = awardXP(student, 50, notifyObservers)
+console.log(`After XP awards — xp (should be 150): ${student.xp}`)
+
+// Break streak
+student = breakStreak(student, notifyObservers)
+console.log(`After break — streak (should be 0): ${student.streak}`)
+
+// Test: streak after break increments fresh
+student = incrementStreak(student, notifyObservers)
+console.log(`After fresh increment — streak (should be 1): ${student.streak}`)
+
+// Test: invalid student name
+console.log("\n── Student Tests: Impossible data ──")
+try {
+  createStudent(createStudentName(""))
+} catch (e) {
+  if (e instanceof Error) console.error("[ERROR CAUGHT]", e.message)
+}
+
+// Test: negative XP
+try {
+  awardXP(student, -50, notifyObservers)
+} catch (e) {
+  if (e instanceof Error) console.error("[ERROR CAUGHT]", e.message)
+}
+
+// Test: zero XP
+try {
+  awardXP(student, 0, notifyObservers)
+} catch (e) {
+  if (e instanceof Error) console.error("[ERROR CAUGHT]", e.message)
+}
+
+// Test: break streak when already zero
+const freshStudent = createStudent(createStudentName("Tatchi"))
+const unchangedStudent = breakStreak(freshStudent, notifyObservers)
+console.log(`Break on zero streak — streak (should be 0): ${unchangedStudent.streak}`)
