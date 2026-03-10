@@ -1,8 +1,9 @@
-import { notifyObservers, observers } from "./src/domain/infrastructure/observers/observer"
-import { sendEmailMock } from "./src/domain/infrastructure/observers/email"
-import { saveToDatabaseMock } from "./src/domain/infrastructure/observers/database"
+import { notifyObservers, observers } from "./src/infrastructure/observers/observer"
+import { sendEmailMock } from "./src/infrastructure/observers/email"
+import { saveToDatabaseMock } from "./src/infrastructure/observers/database"
 import { createModuleTitle, createModule, submitQuiz } from "./src/domain/module/factories"
 import { createCourseTitle, createCourse, evaluateCourseCompletion } from "./src/domain/course/factories"
+import { createStudentName, createStudent, incrementStreak, breakStreak, awardXP } from "./src/domain/student/factories"
 
 // ─── Wire Up Observers ────────────────────────────────────────────────────────
 // This is the only place observers are plugged in.
@@ -154,3 +155,58 @@ const completedCourseTwo = evaluateCourseCompletion(courseTwo, notifyObservers)
 
 console.log(`courseOne status (should be Completed): ${completedCourseOne.status}`)
 console.log(`courseTwo status (should be Completed): ${completedCourseTwo.status}`)
+
+
+// ─── Student Tests ────────────────────────────────────────────────────────────
+
+console.log("\n── Student Tests: Streak and XP ──")
+
+// Create a student
+let student = createStudent(createStudentName("Makuo"))
+console.log(`Student created: ${student.name}, streak: ${student.streak}, xp: ${student.xp}`)
+
+// Increment streak 3 times
+student = incrementStreak(student, notifyObservers)
+student = incrementStreak(student, notifyObservers)
+student = incrementStreak(student, notifyObservers)
+console.log(`After 3 days — streak (should be 3): ${student.streak}`)
+
+// Award XP
+student = awardXP(student, 100, notifyObservers)
+student = awardXP(student, 50, notifyObservers)
+console.log(`After XP awards — xp (should be 150): ${student.xp}`)
+
+// Break streak
+student = breakStreak(student, notifyObservers)
+console.log(`After break — streak (should be 0): ${student.streak}`)
+
+// Test: streak after break increments fresh
+student = incrementStreak(student, notifyObservers)
+console.log(`After fresh increment — streak (should be 1): ${student.streak}`)
+
+// Test: invalid student name
+console.log("\n── Student Tests: Impossible data ──")
+try {
+  createStudent(createStudentName(""))
+} catch (e) {
+  if (e instanceof Error) console.error("[ERROR CAUGHT]", e.message)
+}
+
+// Test: negative XP
+try {
+  awardXP(student, -50, notifyObservers)
+} catch (e) {
+  if (e instanceof Error) console.error("[ERROR CAUGHT]", e.message)
+}
+
+// Test: zero XP
+try {
+  awardXP(student, 0, notifyObservers)
+} catch (e) {
+  if (e instanceof Error) console.error("[ERROR CAUGHT]", e.message)
+}
+
+// Test: break streak when already zero
+const freshStudent = createStudent(createStudentName("Tatchi"))
+const unchangedStudent = breakStreak(freshStudent, notifyObservers)
+console.log(`Break on zero streak — streak (should be 0): ${unchangedStudent.streak}`)
