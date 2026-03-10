@@ -1,6 +1,6 @@
-import { notifyObservers, observers } from "./infrastructure/observers/observer"
-import { sendEmailMock } from "./infrastructure/observers/email"
-import { saveToDatabaseMock } from "./infrastructure/observers/database"
+import { notifyObservers, observers } from "./src/domain/infrastructure/observers/observer"
+import { sendEmailMock } from "./src/domain/infrastructure/observers/email"
+import { saveToDatabaseMock } from "./src/domain/infrastructure/observers/database"
 import { createModuleTitle, createModule, submitQuiz } from "./src/domain/module/factories"
 import { createCourseTitle, createCourse, evaluateCourseCompletion } from "./src/domain/course/factories"
 

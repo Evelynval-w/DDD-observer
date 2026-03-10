@@ -1,4 +1,4 @@
-import { DomainEvent } from "../../src/domain/events/events"
+import { DomainEvent } from "../../domain/events/events"
 
 // ─── Database Mock Observer ───────────────────────────────────────────────────
 // This function simulates saving data to a database in reaction to domain events.
